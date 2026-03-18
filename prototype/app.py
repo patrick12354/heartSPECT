@@ -612,6 +612,13 @@ def show_app_page():
             except Exception as e:
                 st.error(f"Inference failed: {e}")
                 return
+            finally:
+                # Clean up uploaded temporary DICOM
+                if input_mode == "Upload DICOM" and dicom_path and os.path.exists(dicom_path):
+                    try:
+                        os.remove(dicom_path)
+                    except Exception:
+                        pass
 
         # --- Metrics ---
         voxel_count = int(pred_bin.sum())
@@ -758,23 +765,35 @@ def show_app_page():
             tmp_mask = tempfile.NamedTemporaryFile(delete=False, suffix=".nii.gz")
             save_mask_as_nifti(pred_bin, tmp_mask.name)
             with open(tmp_mask.name, 'rb') as f:
-                st.download_button(
-                    label="Download Segmentation Mask (.nii.gz)",
-                    data=f.read(),
-                    file_name="predicted_mask.nii.gz",
-                    mime="application/gzip"
-                )
+                mask_bytes = f.read()
+            try:
+                os.remove(tmp_mask.name)
+            except Exception:
+                pass
+                
+            st.download_button(
+                label="Download Segmentation Mask (.nii.gz)",
+                data=mask_bytes,
+                file_name="predicted_mask.nii.gz",
+                mime="application/gzip"
+            )
 
         with col2:
             tmp_prob = tempfile.NamedTemporaryFile(delete=False, suffix=".nii.gz")
             save_mask_as_nifti(prob_map, tmp_prob.name)
             with open(tmp_prob.name, 'rb') as f:
-                st.download_button(
-                    label="Download Probability Map (.nii.gz)",
-                    data=f.read(),
-                    file_name="probability_map.nii.gz",
-                    mime="application/gzip"
-                )
+                prob_bytes = f.read()
+            try:
+                os.remove(tmp_prob.name)
+            except Exception:
+                pass
+                
+            st.download_button(
+                label="Download Probability Map (.nii.gz)",
+                data=prob_bytes,
+                file_name="probability_map.nii.gz",
+                mime="application/gzip"
+            )
 
         # Safety disclaimer
         st.markdown("---")
