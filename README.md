@@ -40,7 +40,11 @@ heartSPECT/
 └── data/               ← [IGNORED BY GIT] Raw DICOM and processed NIfTI data
 ```
 
-> **Note on Data:** Due to medical data privacy guidelines and repository size limits, the raw DICOM files and preprocessed NIfTI datasets are **not included** in this GitHub repository. The `.gitignore` rule automatically safely excludes them. However, the trained model weights are included so the prototype can be run immediately.
+> **Note on Data:** Due to medical data privacy guidelines and repository size limits, the raw DICOM files and preprocessed NIfTI datasets are **not included** in this GitHub repository. The `.gitignore` rule automatically safely excludes them. 
+> 
+> However, we have included **5 sample DICOM files** in `prototype/sample_data/` so the web app can be tested out-of-the-box. The trained model weights (~67MB) are also included.
+>
+> 📥 **Full Dataset Download:** To acquire the complete dataset used in this project, please download the ZIP file directly from [PhysioNet: Myocardial Perfusion SPECT (1.0.0)](https://physionet.org/content/myocardial-perfusion-spect/get-zip/1.0.0/) and extract the DICOM files into the `data/raw/DICOM/` directory.
 
 ---
 

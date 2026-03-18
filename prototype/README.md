@@ -58,4 +58,4 @@ prototype/
 
 - Python 3.8+
 - Model checkpoint (`models/best_model.pth`) harus sudah ada
-- Data DICOM di `data/raw/DICOM/` (opsional, untuk sample data)
+- **Dataset Penuh:** Jika ingin mencoba lebih dari 5 sampel data bawaan, kamu bisa mengunduh full dataset DICOM di sini: [PhysioNet: Myocardial Perfusion SPECT (1.0.0)](https://physionet.org/content/myocardial-perfusion-spect/get-zip/1.0.0/). Ekstrak ke folder `data/raw/DICOM/` untuk menggunakannya di luar sampel.

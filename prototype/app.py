@@ -19,7 +19,7 @@ from utils import predict_volume, save_mask_as_nifti, TARGET_SHAPE
 # --- Config ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHECKPOINT_PATH = os.path.join(PROJECT_ROOT, "models", "best_model.pth")
-SAMPLE_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "DICOM")
+SAMPLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data")
 
 st.set_page_config(
     page_title="Heart SPECT Segmentation",
