@@ -1,8 +1,8 @@
 # 🫀 HeartSPECT Segmentation Project
 
-This repository contains the source code, trained models, and an interactive web prototype for **Left Ventricle Segmentation** on Cardiac SPECT Imaging using deep learning (3D U-Net).
+[![Live Interactive Prototype!](https://img.shields.io/badge/Live_Prototype-Streamlit_Cloud-FF4B4B?style=for-the-badge&logo=streamlit)](https://heartspect.streamlit.app/)
 
-This project was built to demonstrate **clinical applicability, safety, interpretability, and reproducibility** in automating myocardial perfusion scintigraphy (MPS) analysis.
+Proyek ini bertujuan untuk membangun model Deep Learning (menggunakan arsitektur 3D U-Net) guna melakukan otomatisasi segmentasi ventrikel kiri pada citra medis Myocardial Perfusion SPECT. Evaluasi dilakukan berdasarkan metrik Dice Score, IoU, dan Hausdorff Distance 95%. This project was built to demonstrate **clinical applicability, safety, interpretability, and reproducibility** in automating myocardial perfusion scintigraphy (MPS) analysis.
 
 ---
 
