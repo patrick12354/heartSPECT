@@ -208,6 +208,99 @@ st.markdown("""
         box-shadow: 0 15px 30px rgba(255,255,255,0.2) !important;
         background: #f0f0f0 !important;
     }
+
+    /* =============================================
+       MOBILE RESPONSIVE (max-width: 768px)
+       ============================================= */
+    @media (max-width: 768px) {
+
+        /* Hero Title — shrink massive 4.8rem down to readable */
+        .hero-title {
+            font-size: 2.6rem !important;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        /* Hero Section — center everything on small screens */
+        .hero-container {
+            align-items: center !important;
+            text-align: center !important;
+            padding: 2rem 1rem 2rem;
+        }
+
+        /* Hero text - increase readability padding */
+        .hero-subtitle {
+            font-size: 1rem;
+            margin: 0 auto 2rem;
+        }
+
+        /* Metric badges — stack vertically instead of side by side */
+        .metric-showcase {
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .metric-badge h2 {
+            font-size: 2.8rem;
+        }
+
+        /* Glass cards — reduce padding so they don't overflow */
+        .glass-card {
+            padding: 1.5rem 1.2rem;
+            border-radius: 18px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Card icons — make slightly smaller */
+        .card-icon {
+            font-size: 2rem;
+            padding: 0.7rem;
+        }
+
+        /* Sidebar — make it not take too much space */
+        section[data-testid="stSidebar"] {
+            min-width: 240px !important;
+            max-width: 240px !important;
+        }
+
+        /* Streamlit main container padding */
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+
+    /* Extra small phones (max-width: 480px) */
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem !important;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-badge h2 {
+            font-size: 2.2rem;
+        }
+
+        .metric-badge p {
+            font-size: 0.8rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+        }
+
+        .card-text {
+            font-size: 0.9rem;
+        }
+
+        div[data-testid="stButton"] button {
+            font-size: 0.95rem !important;
+            padding: 0.5rem 1.5rem;
+        }
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -258,13 +351,13 @@ def show_landing_page():
         logo_html = ""
 
     st.markdown(f"""
-        <div class="hero-container reveal visible" style="padding-top: 2rem; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-            <div style="display: flex; align-items: center; margin-bottom: 25px;">
+        <div class="hero-container reveal visible">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 25px;">
                 {logo_html}
                 <div class="hero-label" style="margin-bottom: 0;">CV | MEDICAL AI ENGINE</div>
             </div>
-            <h1 class="hero-title" style="text-align: left; margin-left: 0;">CorVision</h1>
-            <p class="hero-subtitle" style="text-align: left; max-width: 750px; margin-left: 0;">Meningkatkan kualitas diagnosis kardiovaskular dengan segmentasi volumetrik 3D U-Net mutakhir otomatis pada jaringan pencitraan Myocardial Perfusion SPECT.</p>
+            <h1 class="hero-title">CorVision</h1>
+            <p class="hero-subtitle">Meningkatkan kualitas diagnosis kardiovaskular dengan segmentasi volumetrik 3D U-Net mutakhir otomatis pada jaringan pencitraan Myocardial Perfusion SPECT.</p>
         </div>
     """, unsafe_allow_html=True)
     
