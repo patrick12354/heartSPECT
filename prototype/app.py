@@ -526,6 +526,16 @@ def show_landing_page():
 
 def show_app_page():
     """Main application view for segmentation interactive UI."""
+    components.html("""
+        <script>
+            let attempts = 0;
+            const scrollInterval = setInterval(function() {
+                window.parent.scrollTo(0, 0);
+                attempts++;
+                if (attempts > 10) clearInterval(scrollInterval);
+            }, 50);
+        </script>
+    """, height=0)
     # Navigation Back Button
     if st.sidebar.button("← Back to Landing Page"):
         st.session_state.page = "landing"
