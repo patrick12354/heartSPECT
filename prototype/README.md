@@ -1,4 +1,4 @@
-# 🫀 Heart SPECT Segmentation — Prototype
+nse# 🫀 Heart SPECT Segmentation — Prototype
 
 Web app prototype untuk segmentasi ventrikel kiri pada cardiac SPECT imaging menggunakan 3D U-Net.
 
@@ -17,6 +17,10 @@ pip install -r prototype/requirements.txt
 
 ### 2. Jalankan Aplikasi
 
+**Cara Paling Mudah (Windows):**
+Cukup *double-click* (klik ganda) file **`run_prototype.bat`** yang ada di folder luar (`spect/`). Aplikasi akan berjalan dan otomatis terbuka di browser Anda.
+
+**Cara Manual via Terminal:**
 ```bash
 streamlit run prototype/app.py
 ```
