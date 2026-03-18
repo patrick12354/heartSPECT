@@ -248,25 +248,23 @@ def show_landing_page():
     """Landing page view for product pitching."""
     
     # --- HERO SECTION ---
-    st.markdown("<br>", unsafe_allow_html=True)
-        
+    # Load transparent circular logo
     try:
         import base64
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png"), "rb") as image_file:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo_transparent.png"), "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
-            st.markdown(f'''
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: -10px;">
-                <img src="data:image/png;base64,{encoded_string}" style="max-width: 140px; height: auto;" />
-            </div>
-            ''', unsafe_allow_html=True)
+            logo_html = f'<img src="data:image/png;base64,{encoded_string}" style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); margin-right: 15px;" />'
     except Exception:
-        pass # fallback if logo is missing
+        logo_html = ""
 
-    st.markdown("""
-        <div class="hero-container reveal visible" style="padding-top: 1rem;">
-            <div class="hero-label">CV | MEDICAL AI ENGINE</div>
-            <h1 class="hero-title">CorVision</h1>
-            <p class="hero-subtitle">Meningkatkan kualitas diagnosis kardiovaskular dengan segmentasi volumetrik 3D U-Net mutakhir otomatis pada jaringan pencitraan Myocardial Perfusion SPECT.</p>
+    st.markdown(f"""
+        <div class="hero-container reveal visible" style="padding-top: 2rem; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+            <div style="display: flex; align-items: center; margin-bottom: 25px;">
+                {logo_html}
+                <div class="hero-label" style="margin-bottom: 0;">CV | MEDICAL AI ENGINE</div>
+            </div>
+            <h1 class="hero-title" style="text-align: left; margin-left: 0;">CorVision</h1>
+            <p class="hero-subtitle" style="text-align: left; max-width: 750px; margin-left: 0;">Meningkatkan kualitas diagnosis kardiovaskular dengan segmentasi volumetrik 3D U-Net mutakhir otomatis pada jaringan pencitraan Myocardial Perfusion SPECT.</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -334,7 +332,89 @@ def show_landing_page():
         </div>
     """, unsafe_allow_html=True)
     
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # --- CLINICAL WORKFLOW SECTION ---
+    st.markdown('<h2 class="hero-title reveal delay-1" style="font-size: 2.2rem; text-align: center; margin-top: 3rem; margin-bottom: 2rem;">Alur Kerja Klinis</h2>', unsafe_allow_html=True)
+    
+    w1, w2, w3, w4 = st.columns(4)
+    with w1:
+        st.markdown("""
+            <div class="glass-card reveal delay-1" style="text-align: center; padding: 20px;">
+                <h1 style="color: #64ffda; margin: 0; font-size: 3rem;">1</h1>
+                <h4 style="color: white; margin-top: 10px;">Akuisisi Data</h4>
+                <p style="font-size: 0.85rem; color: #a0aec0;">Scan SPECT myokardial pasien dikumpulkan dalam format DICOM 3D standar dari Rumah Sakit.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with w2:
+        st.markdown("""
+            <div class="glass-card reveal delay-2" style="text-align: center; padding: 20px;">
+                <h1 style="color: #64ffda; margin: 0; font-size: 3rem;">2</h1>
+                <h4 style="color: white; margin-top: 10px;">Pre-processing</h4>
+                <p style="font-size: 0.85rem; color: #a0aec0;">CorVision secara cerdas menormalisasi intensitas voxel dan melakukan resample resolusi secara otomatis.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with w3:
+        st.markdown("""
+            <div class="glass-card reveal delay-3" style="text-align: center; padding: 20px;">
+                <h1 style="color: #64ffda; margin: 0; font-size: 3rem;">3</h1>
+                <h4 style="color: white; margin-top: 10px;">Inference AI</h4>
+                <p style="font-size: 0.85rem; color: #a0aec0;">Model U-Net mengekstraksi fitur spasial secara real-time untuk memisahkan anatomi ventrikel kiri.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with w4:
+        st.markdown("""
+            <div class="glass-card reveal delay-4" style="text-align: center; padding: 20px;">
+                <h1 style="color: #64ffda; margin: 0; font-size: 3rem;">4</h1>
+                <h4 style="color: white; margin-top: 10px;">Verifikasi Medis</h4>
+                <p style="font-size: 0.85rem; color: #a0aec0;">Dokter spesialis meninjau hasil mask 3D melalui visualizer volumetrik pada dasbor ini.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # --- METHODOLOGY SECTION ---
+    st.markdown('<h2 class="hero-title reveal delay-1" style="font-size: 2.2rem; text-align: center; margin-bottom: 2rem;">Arsitektur & Metodologi</h2>', unsafe_allow_html=True)
+    
+    m1, m2 = st.columns([1, 1])
+    with m1:
+        st.markdown("""
+            <div class="glass-card reveal delay-2" style="padding: 30px; height: 100%;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3rem;">🧠 Model 3D U-Net Deep Learning</h3>
+                <p style="color: #a0aec0; line-height: 1.6;">
+                    Inti dari CorVision adalah arsitektur <strong>Fully Convolutional Network (3D U-Net)</strong> kustom. Tidak seperti model klasifikasi gambar biasa, jaringan komputer ini membaca seluruh matriks kubus (Voxel) sekaligus, mengidentifikasi pola kepadatan radioisotop dalam 3 dimensi.
+                </p>
+                <ul style="color: #a0aec0; line-height: 1.6; margin-top: 15px;">
+                    <li><strong>Encoder-Decoder:</strong> Menangkap fitur tekstur halus sekaligus konteks organ tetangga.</li>
+                    <li><strong>Skip-Connections:</strong> Memulihkan batas visual ventrikel yang tajam dan persisi.</li>
+                    <li><strong>5.6 Juta Parameter:</strong> Bobot terlatih pada dataset medis spesifik rumah sakit.</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with m2:
+        st.markdown("""
+            <div class="glass-card reveal delay-3" style="padding: 30px; height: 100%;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3rem;">⚖️ Penanganan Ketidakseimbangan Ekstrim</h3>
+                <p style="color: #a0aec0; line-height: 1.6;">
+                    Salah satu tantangan terbesar medis adalah ventrikel kiri hanya mencakup kurang dari <strong>1% total volume gambar SPECT</strong> (ekstrim <i>class imbalance</i>).
+                </p>
+                <p style="color: #a0aec0; line-height: 1.6;">
+                    CorVision mengatasinya dengan menggunakan <strong>Kombinasi Loss Function</strong> cerdas selama fase pelatihan: <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">0.5 * Dice Loss + 0.5 * Binary Cross Entropy</code>. Metode ini secara paksa mensinergikan sensitivitas pelacakan batas piksel dan akurasi global voxels.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+    
+    # CTA BOTTOM
+    col_bot1, col_bot2, col_bot3 = st.columns([1, 1, 1])
+    with col_bot2:
+        st.markdown('<div class="reveal visible delay-1" style="display:flex; justify-content:center; margin-bottom: 5rem;">', unsafe_allow_html=True)
+        if st.button("Coba Analisis DICOM Sekarang", use_container_width=True, type="secondary"):
+            st.session_state.page = "app"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # --- Inject Custom JS at the BOTTOM to prevent layout shifts ---
     components.html(
