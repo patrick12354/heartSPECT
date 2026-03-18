@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Data
+data/raw/DICOM/*
+data/processed/*
+data/nnunet/*
+!data/raw/DICOM/.gitkeep
+!data/processed/.gitkeep
+!data/nnunet/.gitkeep
+
+# Ignore medical image formats globally just in case
+*.dcm
+*.nii
+*.nii.gz
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE & OS
+.vscode/
+.DS_Store
+Thumbs.db
