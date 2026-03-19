@@ -369,8 +369,25 @@ def inject_shell_effects(enable_reveal=False, scroll_top=False, enable_cursor=Tr
     cursor_visibility_js = """
         const activeRing = doc.getElementById("cursor-ring");
         if (activeRing) {
-            activeRing.style.display = "block";
+            activeRing.style.display = "none";
         }
+
+        if (!parentWin.__corvisionCursorWakeHandler) {
+            parentWin.__corvisionCursorWakeHandler = (e) => {
+                const wakeRing = doc.getElementById("cursor-ring");
+                if (!wakeRing) return;
+                parentWin.__corvisionMouseX = e.clientX;
+                parentWin.__corvisionMouseY = e.clientY;
+                parentWin.__corvisionCurrentX = e.clientX;
+                parentWin.__corvisionCurrentY = e.clientY;
+                wakeRing.style.left = `${e.clientX}px`;
+                wakeRing.style.top = `${e.clientY}px`;
+                wakeRing.style.display = "block";
+            };
+        }
+
+        doc.removeEventListener("mousemove", parentWin.__corvisionCursorWakeHandler);
+        doc.addEventListener("mousemove", parentWin.__corvisionCursorWakeHandler, { passive: true });
     """ if enable_cursor else """
         const activeRing = doc.getElementById("cursor-ring");
         if (activeRing) {
