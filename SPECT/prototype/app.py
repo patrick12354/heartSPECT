@@ -337,7 +337,7 @@ def render_slice(img_slice, mask_slice=None, prob_slice=None, title="",
     return fig
 
 
-def inject_shell_effects(enable_reveal=False, scroll_top=False):
+def inject_shell_effects(enable_reveal=False, scroll_top=False, enable_cursor=True):
     """Attach persistent UI effects on the parent Streamlit document."""
     reveal_js = """
         if (!parentWin.__corvisionRevealObserver) {
@@ -365,6 +365,18 @@ def inject_shell_effects(enable_reveal=False, scroll_top=False):
             if (attempts > 10) clearInterval(scrollInterval);
         }, 50);
     """ if scroll_top else ""
+
+    cursor_visibility_js = """
+        const activeRing = doc.getElementById("cursor-ring");
+        if (activeRing) {
+            activeRing.style.display = "block";
+        }
+    """ if enable_cursor else """
+        const activeRing = doc.getElementById("cursor-ring");
+        if (activeRing) {
+            activeRing.style.display = "none";
+        }
+    """
 
     components.html(f"""
         <script>
@@ -474,6 +486,7 @@ def inject_shell_effects(enable_reveal=False, scroll_top=False):
         }};
         animateCursor();
 
+        {cursor_visibility_js}
         {reveal_js}
         {scroll_js}
         </script>
@@ -655,7 +668,7 @@ def show_landing_page():
 
 def show_app_page():
     """Main application view for segmentation interactive UI."""
-    inject_shell_effects(scroll_top=True)
+    inject_shell_effects(scroll_top=True, enable_cursor=False)
     # Navigation Back Button
     if st.sidebar.button("← Back to Landing Page"):
         st.session_state.page = "landing"
