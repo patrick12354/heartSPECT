@@ -369,25 +369,8 @@ def inject_shell_effects(enable_reveal=False, scroll_top=False, enable_cursor=Tr
     cursor_visibility_js = """
         const activeRing = doc.getElementById("cursor-ring");
         if (activeRing) {
-            activeRing.style.display = "none";
+            activeRing.style.display = "block";
         }
-
-        if (!parentWin.__corvisionCursorWakeHandler) {
-            parentWin.__corvisionCursorWakeHandler = (e) => {
-                const wakeRing = doc.getElementById("cursor-ring");
-                if (!wakeRing) return;
-                parentWin.__corvisionMouseX = e.clientX;
-                parentWin.__corvisionMouseY = e.clientY;
-                parentWin.__corvisionCurrentX = e.clientX;
-                parentWin.__corvisionCurrentY = e.clientY;
-                wakeRing.style.left = `${e.clientX}px`;
-                wakeRing.style.top = `${e.clientY}px`;
-                wakeRing.style.display = "block";
-            };
-        }
-
-        doc.removeEventListener("mousemove", parentWin.__corvisionCursorWakeHandler);
-        doc.addEventListener("mousemove", parentWin.__corvisionCursorWakeHandler, { passive: true });
     """ if enable_cursor else """
         const activeRing = doc.getElementById("cursor-ring");
         if (activeRing) {
@@ -512,7 +495,7 @@ def inject_shell_effects(enable_reveal=False, scroll_top=False, enable_cursor=Tr
 
 def show_landing_page():
     """Landing page view for product pitching."""
-    inject_shell_effects(enable_reveal=True)
+    inject_shell_effects(enable_reveal=True, scroll_top=True)
     
     # --- HERO SECTION ---
     # Load transparent circular logo
