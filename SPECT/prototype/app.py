@@ -337,8 +337,152 @@ def render_slice(img_slice, mask_slice=None, prob_slice=None, title="",
     return fig
 
 
+def inject_shell_effects(enable_reveal=False, scroll_top=False):
+    """Attach persistent UI effects on the parent Streamlit document."""
+    reveal_js = """
+        if (!parentWin.__corvisionRevealObserver) {
+            parentWin.__corvisionRevealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+        }
+
+        setTimeout(() => {
+            doc.querySelectorAll('.reveal').forEach((el) => {
+                parentWin.__corvisionRevealObserver.observe(el);
+            });
+        }, 500);
+    """ if enable_reveal else ""
+
+    scroll_js = """
+        let attempts = 0;
+        const scrollInterval = setInterval(() => {
+            parentWin.scrollTo(0, 0);
+            attempts++;
+            if (attempts > 10) clearInterval(scrollInterval);
+        }, 50);
+    """ if scroll_top else ""
+
+    components.html(f"""
+        <script>
+        const parentWin = window.parent;
+        const doc = parentWin.document;
+
+        doc.body.style.overflowX = 'hidden';
+        doc.documentElement.style.overflowX = 'hidden';
+
+        if (!doc.getElementById("ambient-glow")) {{
+            const bg = doc.createElement("div");
+            bg.id = "ambient-glow";
+            bg.style.cssText = `
+                position: fixed; top: -20vh; right: -10vw;
+                width: 70vw; height: 70vw;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(160, 196, 255, 0.08) 0%, transparent 70%);
+                filter: blur(100px);
+                z-index: -1;
+                pointer-events: none;
+                transition: transform 3s ease-out;
+            `;
+            doc.body.insertBefore(bg, doc.body.firstChild);
+        }}
+
+        if (!parentWin.__corvisionGlowMouseMove) {{
+            parentWin.__corvisionGlowMouseMove = (e) => {{
+                const bg = doc.getElementById("ambient-glow");
+                if (!bg) return;
+                const moveX = (e.clientX / parentWin.innerWidth - 0.5) * -50;
+                const moveY = (e.clientY / parentWin.innerHeight - 0.5) * -50;
+                bg.style.transform = `translate(${{moveX}}px, ${{moveY}}px)`;
+            }};
+            doc.addEventListener("mousemove", parentWin.__corvisionGlowMouseMove);
+        }}
+
+        let ring = doc.getElementById("cursor-ring");
+        if (!ring) {{
+            ring = doc.createElement("div");
+            ring.id = "cursor-ring";
+            ring.style.cssText = `
+                position: fixed; width: 40px; height: 40px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                pointer-events: none; z-index: 9999;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s, background 0.3s, border 0.3s;
+            `;
+            doc.body.appendChild(ring);
+        }}
+
+        if (typeof parentWin.__corvisionMouseX !== "number") {{
+            parentWin.__corvisionMouseX = parentWin.innerWidth / 2;
+            parentWin.__corvisionMouseY = parentWin.innerHeight / 2;
+            parentWin.__corvisionCurrentX = parentWin.__corvisionMouseX;
+            parentWin.__corvisionCurrentY = parentWin.__corvisionMouseY;
+        }}
+
+        if (!parentWin.__corvisionCursorMouseMove) {{
+            parentWin.__corvisionCursorMouseMove = (e) => {{
+                parentWin.__corvisionMouseX = e.clientX;
+                parentWin.__corvisionMouseY = e.clientY;
+            }};
+            doc.addEventListener("mousemove", parentWin.__corvisionCursorMouseMove);
+        }}
+
+        if (!parentWin.__corvisionCursorHoverIn) {{
+            parentWin.__corvisionCursorHoverIn = (e) => {{
+                if (e.target.closest("button") || e.target.closest(".glass-card")) {{
+                    const activeRing = doc.getElementById("cursor-ring");
+                    if (!activeRing) return;
+                    activeRing.style.width = "70px";
+                    activeRing.style.height = "70px";
+                    activeRing.style.background = "rgba(255,255,255,0.05)";
+                    activeRing.style.border = "1px solid rgba(255,255,255,0.6)";
+                }}
+            }};
+            doc.addEventListener("mouseover", parentWin.__corvisionCursorHoverIn);
+        }}
+
+        if (!parentWin.__corvisionCursorHoverOut) {{
+            parentWin.__corvisionCursorHoverOut = (e) => {{
+                if (e.target.closest("button") || e.target.closest(".glass-card")) {{
+                    const activeRing = doc.getElementById("cursor-ring");
+                    if (!activeRing) return;
+                    activeRing.style.width = "40px";
+                    activeRing.style.height = "40px";
+                    activeRing.style.background = "transparent";
+                    activeRing.style.border = "1px solid rgba(255, 255, 255, 0.3)";
+                }}
+            }};
+            doc.addEventListener("mouseout", parentWin.__corvisionCursorHoverOut);
+        }}
+
+        if (parentWin.__corvisionCursorAnimationId) {{
+            parentWin.cancelAnimationFrame(parentWin.__corvisionCursorAnimationId);
+        }}
+
+        const animateCursor = () => {{
+            const activeRing = doc.getElementById("cursor-ring");
+            if (!activeRing) return;
+            parentWin.__corvisionCurrentX += (parentWin.__corvisionMouseX - parentWin.__corvisionCurrentX) * 0.2;
+            parentWin.__corvisionCurrentY += (parentWin.__corvisionMouseY - parentWin.__corvisionCurrentY) * 0.2;
+            activeRing.style.left = `${{parentWin.__corvisionCurrentX}}px`;
+            activeRing.style.top = `${{parentWin.__corvisionCurrentY}}px`;
+            parentWin.__corvisionCursorAnimationId = parentWin.requestAnimationFrame(animateCursor);
+        }};
+        animateCursor();
+
+        {reveal_js}
+        {scroll_js}
+        </script>
+    """, height=0)
+
+
 def show_landing_page():
     """Landing page view for product pitching."""
+    inject_shell_effects(enable_reveal=True)
     
     # --- HERO SECTION ---
     # Load transparent circular logo
@@ -509,126 +653,9 @@ def show_landing_page():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Inject Custom JS at the BOTTOM to prevent layout shifts ---
-    components.html(
-        """
-        <script>
-        const doc = window.parent.document;
-        
-        // Fix horizontal scrolling and overflow
-        doc.body.style.overflowX = 'hidden';
-        doc.documentElement.style.overflowX = 'hidden';
-        
-        // 1. Sleek Background Glow (Apple/Google Style Soft Ambient Blob)
-        if (!doc.getElementById("ambient-glow")) {
-            const bg = doc.createElement("div");
-            bg.id = "ambient-glow";
-            bg.style.cssText = `
-                position: fixed; top: -20vh; right: -10vw;
-                width: 70vw; height: 70vw;
-                border-radius: 50%;
-                background: radial-gradient(circle, rgba(160, 196, 255, 0.08) 0%, transparent 70%);
-                filter: blur(100px);
-                z-index: -1;
-                pointer-events: none;
-                transition: transform 3s ease-out;
-            `;
-            doc.body.insertBefore(bg, doc.body.firstChild);
-
-            // Subtle parallax effect on mouse move for the background
-            doc.addEventListener("mousemove", (e) => {
-                const moveX = (e.clientX / window.innerWidth - 0.5) * -50;
-                const moveY = (e.clientY / window.innerHeight - 0.5) * -50;
-                bg.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            });
-        }
-
-        // 2. Minimalist Cursor Follower
-        if (!doc.getElementById("cursor-ring")) {
-            const ring = doc.createElement("div");
-            ring.id = "cursor-ring";
-            ring.style.cssText = `
-                position: fixed; width: 40px; height: 40px;
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                border-radius: 50%;
-                pointer-events: none; z-index: 9999;
-                transform: translate(-50%, -50%);
-                transition: width 0.3s, height 0.3s, background 0.3s, border 0.3s;
-            `;
-            doc.body.appendChild(ring);
-
-            let mouseX = window.innerWidth / 2;
-            let mouseY = window.innerHeight / 2;
-            let currentX = mouseX;
-            let currentY = mouseY;
-
-            doc.addEventListener("mousemove", (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
-
-            // Smooth interpolation
-            const animateCursor = () => {
-                currentX += (mouseX - currentX) * 0.2;
-                currentY += (mouseY - currentY) * 0.2;
-                ring.style.left = `${currentX}px`;
-                ring.style.top = `${currentY}px`;
-                requestAnimationFrame(animateCursor);
-            };
-            animateCursor();
-            
-            // Interaction effects (Hover snaps/expands)
-            doc.addEventListener("mouseover", (e) => {
-                if(e.target.closest("button") || e.target.closest(".glass-card")) {
-                    ring.style.width = "70px";
-                    ring.style.height = "70px";
-                    ring.style.background = "rgba(255,255,255,0.05)";
-                    ring.style.border = "1px solid rgba(255,255,255,0.6)";
-                }
-            });
-            doc.addEventListener("mouseout", (e) => {
-                if(e.target.closest("button") || e.target.closest(".glass-card")) {
-                    ring.style.width = "40px";
-                    ring.style.height = "40px";
-                    ring.style.background = "transparent";
-                    ring.style.border = "1px solid rgba(255, 255, 255, 0.3)";
-                }
-            });
-        }
-        
-        // 3. Proper Scroll Reveal Observer
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        // Give Streamlit a moment to render DOM blocks
-        setTimeout(() => {
-            doc.querySelectorAll('.reveal').forEach(el => {
-                observer.observe(el);
-            });
-        }, 500);
-        </script>
-        """, height=0
-    )
-
-
-
 def show_app_page():
     """Main application view for segmentation interactive UI."""
-    components.html("""
-        <script>
-            let attempts = 0;
-            const scrollInterval = setInterval(function() {
-                window.parent.scrollTo(0, 0);
-                attempts++;
-                if (attempts > 10) clearInterval(scrollInterval);
-            }, 50);
-        </script>
-    """, height=0)
+    inject_shell_effects(scroll_top=True)
     # Navigation Back Button
     if st.sidebar.button("← Back to Landing Page"):
         st.session_state.page = "landing"
