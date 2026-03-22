@@ -1,0 +1,249 @@
+TECHNICAL REPORT SUMMARY
+Repository: IDSC 2026 - Team Dawnbringer
+Working title candidate: Quality-Aware AI for Hope in Healthcare: A Cross-Modal Study Across Four Biomedical Datasets
+
+1. Repository Overview
+
+This repository is a multi-project submission space for IDSC 2026 by Team Dawnbringer. The central thesis is that AI can remain clinically useful on noisy, heterogeneous biomedical data if the pipeline is built with strong methodological rigor, clinically meaningful evaluation, and quality-aware modeling where appropriate.
+
+The repository is organized as a portfolio of four healthcare AI studies:
+
+- SPECT: left ventricle segmentation from myocardial perfusion SPECT volumes
+- bigP3BCI: motor imagery / P300-related EEG modeling for brain-computer interface use cases
+- Brugada: Brugada syndrome detection from 12-lead ECG recordings
+- Hillel Yaffe Glaucoma: glaucoma detection from retinal fundus images
+
+Although each folder is a separate technical study, together they support one submission narrative: medical AI should not be judged only by raw performance, but by whether it can operate credibly on real-world data that are often noisy, quality-sensitive, and clinically high stakes.
+
+2. Core Technical Narrative
+
+The strongest unifying narrative in this repository is "quality-aware AI." The idea is that model behavior can improve if the system accounts for signal quality, image quality, or clinically relevant quality proxies instead of treating every sample as equally reliable.
+
+Across the repository, that idea appears in different forms:
+
+- Hillel Yaffe Glaucoma uses image quality scores in a quality-aware classification setup.
+- bigP3BCI uses ALSFRS-R severity as a proxy for EEG signal quality and combines it with model pretraining.
+- Brugada uses per-lead SNR and a quality-aware architecture for ECG classification.
+- SPECT is the exception: it mainly demonstrates a strong segmentation pipeline, but the current documentation explicitly treats quality-aware modeling there as an opportunity for future extension rather than a completed contribution.
+
+This cross-modal framing is valuable for a technical report because it turns the repository from a collection of notebooks into a coherent scientific argument.
+
+3. Subproject Summaries
+
+3.1 Hillel Yaffe Glaucoma
+
+Clinical goal:
+Detect glaucomatous optic neuropathy from retinal fundus images to support earlier ophthalmic screening.
+
+Dataset and context:
+- 747 fundus images from 288 unique patients
+- Class imbalance is present: 548 positive samples and 199 negative samples
+- Image quality scores are available on a 1-10 scale, which makes this dataset well suited for quality-aware modeling
+
+Technical approach:
+- EfficientNet-B3 pretrained on ImageNet
+- Baseline model and quality-aware variant
+- Preprocessing includes circular mask detection, resizing to 384 x 384, CLAHE augmentation, and ImageNet-style normalization
+- Evaluation uses stratified 5-fold cross-validation at patient level to reduce leakage
+- Additional rigor includes bootstrap confidence intervals, calibration with temperature scaling, and Grad-CAM for explainability
+
+Reported results in repository documentation:
+- Baseline test AUC: 0.9745
+- Quality-aware model test AUC: 0.9638
+- Best calibrated/ensemble performance: AUC 0.9777
+- Sensitivity: 0.9711
+- Specificity: 0.9034
+
+Interpretation:
+This is one of the strongest studies in the repository from both performance and methodological standpoints. The quality-aware effect appears modest, which the project notes interpret as evidence that image quality is relatively consistent in this dataset. The main strength is rigorous validation and clinically plausible explainability focused on the optic disc region.
+
+3.2 bigP3BCI
+
+Clinical goal:
+Support assistive communication and intention detection in severe motor impairment contexts by modeling EEG-based BCI signals.
+
+Dataset and context:
+- Large public EEG/BCI dataset with 6,980 EDF files
+- 327 unique subjects
+- 20 sub-studies
+- The project focuses on ALS-related subsets and P300 target vs non-target detection
+- Strong class imbalance around 8.3:1
+
+Technical approach:
+- EEGNetExtended architecture
+- Two-level strategy: baseline and quality-aware dual-stream variant
+- ALSFRS-R severity is used as a proxy for data quality or signal reliability
+- Pretraining on a broader subject pool before fine-tuning on ALS subset
+- Notebook structure suggests workflow sections for subset building, EDA, feature extraction/modeling, ALSFRS analysis, and rework iteration
+
+Reported results in repository documentation:
+- Baseline scratch AUC: 0.7038
+- Pretrained baseline AUC: 0.7199
+- Quality-aware without pretraining AUC: 0.7084
+- Best combined setup: AUC 0.7391
+- Sensitivity: about 0.642
+- Specificity: about 0.699
+
+Interpretation:
+This is the noisiest and arguably hardest classification task in the repository. The absolute AUC is lower than the image and ECG tasks, but the project documentation argues that the result is still competitive for epoch-level EEG/BCI classification. The biggest technical takeaway is that quality-aware modeling becomes more useful when the underlying data are unstable and difficult. Pretraining appears to be a major contributor to the gain.
+
+3.3 Brugada
+
+Clinical goal:
+Detect Brugada syndrome from 12-lead ECG to support earlier review of high-risk patients who may be vulnerable to ventricular arrhythmia and sudden cardiac death.
+
+Dataset and context:
+- 363 subjects total
+- 76 Brugada patients
+- 287 normal controls
+- 12-second ECG recordings sampled at 100 Hz
+- Includes additional clinical metadata such as basal pattern and sudden death history
+
+Technical approach:
+- Multi-model pipeline
+- XGBoost on 189 handcrafted features
+- 1D CNN on raw signal and beat-averaged template
+- Quality-aware ResNet1D with SNR encoder for 12 leads
+- Strong evaluation design using nested cross-validation with 5 outer folds and 3 inner folds
+- Bootstrap confidence intervals, temperature scaling, threshold optimization, subgroup analysis, SHAP, and Grad-CAM
+
+Reported results in repository documentation:
+- XGBoost AUC: 0.8676
+- 1D CNN AUC: 0.9161
+- Quality-aware ResNet + SNR AUC: 0.9205
+- Best calibrated ensemble AUC: 0.9365
+- Sensitivity: 0.921
+- Specificity: 0.756
+- F1-score: 0.648
+- PPV: 0.500
+- NPV: 0.973
+
+Interpretation:
+This appears to be the strongest single-study candidate if the team wants one flagship project for a final technical report. The methodological rigor is the highest in the repository, the clinical relevance is high, and the subgroup finding that all available sudden-death-history Brugada patients were detected gives the project strong practical weight. The repository documentation repeatedly frames Brugada as the cleanest center of a competition submission narrative.
+
+3.4 SPECT / CorVision
+
+Clinical goal:
+Segment the left ventricle from myocardial perfusion SPECT volumes to support cardiac function assessment and downstream analysis.
+
+Dataset and context:
+- Myocardial perfusion scintigraphy data from 83 unique patients
+- Acquired with a CZT-based gamma camera under standardized rest-only protocol
+- Data available in DICOM and NIfTI forms
+- Demographic metadata include sex, age, and BMI when available
+- Major challenge: extreme voxel imbalance because the target region occupies only a small fraction of the volume
+
+Technical approach:
+- 3D U-Net in PyTorch, around 5.6 million parameters according to project notes
+- Volumes resampled to isotropic 64 x 64 x 64
+- Combined binary cross-entropy plus Dice loss
+- AdamW optimizer with cosine annealing learning rate schedule
+- Single train/validation/test split around 70/15/15
+- Streamlit prototype included for demo and inference review
+
+Reported results in repository documentation:
+- Dice score: 0.9055
+- IoU: 0.8286
+- Sensitivity: 0.8947
+- Specificity: 0.9988
+- Precision: 0.9288
+- HD95: 1.9076 mm
+
+Interpretation:
+This is the strongest segmentation result in the repository and a compelling engineering showcase because it includes both research notebooks and a working prototype. However, the documentation also acknowledges that the evaluation rigor is weaker than in Brugada or HYGD because it relies on a single split rather than more extensive resampling-based validation. For that reason, SPECT is excellent as a supporting engineering case study, but weaker as the central scientific claim if the report needs maximum rigor.
+
+4. Cross-Project Comparison
+
+The repository supports several high-level claims:
+
+- AI can learn useful clinical patterns across very different modalities: fundus imaging, EEG, ECG, and nuclear cardiac imaging.
+- Quality-aware modeling is most useful when signal quality is highly variable or poor.
+- Strong validation design matters as much as model architecture.
+- Clinical impact arguments become stronger when paired with interpretability, subgroup analysis, and calibration.
+
+A useful synthesis from the existing repo documents is:
+
+- Hillel Yaffe Glaucoma: strongest image classification study with strong rigor
+- Brugada: strongest overall flagship study and best single-project report candidate
+- bigP3BCI: most convincing evidence that quality-aware modeling helps when the data are very noisy
+- SPECT: strongest engineering/prototype component and strongest segmentation demonstration
+
+5. Strengths of the Repository
+
+- Clear multi-modal healthcare focus
+- Consistent competition narrative tied to "Mathematics and Hope in Healthcare"
+- Strong notebook-based experimentation across all four domains
+- Existing documentation already contains substantial technical and clinical framing
+- Brugada and Hillel Yaffe Glaucoma have especially strong validation narratives
+- SPECT adds a prototype component, which improves demonstration value beyond notebook-only work
+
+6. Current Limitations and Risks
+
+- Much of the repository is notebook-centric rather than organized as reusable packaged code
+- Some result claims appear in explanation documents and README files rather than in a unified formal report
+- SPECT evaluation is less rigorous than the best classification studies in the repo
+- bigP3BCI is clinically meaningful but harder to explain to general judges because the signal domain is more specialized and the raw performance looks lower without context
+- The repository would benefit from one final report that standardizes terminology, dataset descriptions, metrics, and methodological justification across all four tracks
+
+7. Recommended Report Positioning
+
+If the final report should cover the whole repository:
+Present it as a cross-modal healthcare AI portfolio unified by quality-aware reasoning and methodological rigor.
+
+If the final report should optimize for strongest competition impact:
+Use Brugada as the core study, supported by Hillel Yaffe Glaucoma and bigP3BCI as cross-modal evidence, while presenting SPECT as an engineering extension and proof of deployment potential.
+
+If the final report must stay concise and easy to score:
+Center the report on three projects: Brugada, Hillel Yaffe Glaucoma, and bigP3BCI. Include SPECT in a shorter section or appendix-style summary because the repository's own explanation file treats SPECT as scientifically promising but less rigorous in validation.
+
+8. Suggested 5-Page Technical Report Outline
+
+Page 1: Introduction and Problem Framing
+- Introduce IDSC 2026 theme and healthcare motivation
+- State the central thesis of quality-aware AI
+- Explain why noisy biomedical data make this problem important
+- Briefly summarize the four modalities in the repo
+
+Page 2: Data and Methods
+- Describe each dataset in one short paragraph
+- Explain the model families used in each task
+- Highlight where quality-aware modeling enters the pipeline
+- Clarify evaluation strategy: patient-level CV, nested CV, calibration, bootstrap CI, segmentation metrics
+
+Page 3: Results
+- Present the main metrics for each subproject
+- Compare the strength of quality-aware vs baseline setups
+- Emphasize Brugada and HYGD as highest-rigor studies
+- Explain that lower EEG scores should be interpreted in the context of much noisier data
+
+Page 4: Clinical Relevance and Interpretability
+- Describe why glaucoma screening, Brugada detection, BCI for ALS, and SPECT segmentation matter clinically
+- Include interpretability concepts such as Grad-CAM, SHAP, saliency, subgroup analysis, and calibration
+- Connect model behavior to trust and practical use
+
+Page 5: Discussion, Limitations, and Conclusion
+- Summarize the main cross-modal insight: quality-aware modeling helps most when data quality is unstable
+- Discuss limitations, especially notebook-centric structure and uneven validation strength across tasks
+- State the practical healthcare impact
+- Close with the "hope in healthcare" message and future work directions
+
+9. Suggested Writing Emphasis for the Final Report
+
+To turn this summary into a full report, the writing should emphasize:
+
+- Rigor over hype
+- Clinical relevance over generic AI claims
+- Quality-aware modeling as the main scientific thread
+- Brugada as the strongest flagship example
+- HYGD as strong supporting evidence
+- bigP3BCI as proof that the framework matters in the noisiest setting
+- SPECT as a deployment-oriented segmentation case with prototype value
+
+10. Practical Conclusion
+
+This repository is not just a collection of disconnected notebooks. It is best understood as a cross-modal healthcare AI portfolio built around one central proposition: robust and clinically useful AI systems should explicitly respect data quality, validate carefully, and communicate uncertainty and interpretability in a medically meaningful way.
+
+For a five-page technical report, the repository already contains enough material to support a strong narrative. The cleanest strategy is to frame the report around quality-aware AI, use Brugada as the flagship study, and use the other projects to demonstrate that the same principle generalizes across multiple medical modalities.
+
+Note:
+All metrics and project descriptions in this summary are drawn from the current repository documentation and explanation files. They should be cross-checked against final notebook outputs before submission of any formal report.
